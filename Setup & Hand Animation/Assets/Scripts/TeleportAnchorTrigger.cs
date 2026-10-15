@@ -1,41 +1,44 @@
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 
+[RequireComponent(typeof(TeleportationAnchor))]
 public class TeleportAnchorTrigger : MonoBehaviour
 {
     public Material redPoint;
     public Material greenPoint;
     public Renderer rend;
+    public GameObject wallToRemove;      // still only needed on one anchor
 
-    public static int activatedCount = 0;   // fælles counter for alle anchors
-    public static int totalAnchors = 3;     // sæt dette til antal anchors
+    static int activatedCount;
+    static int totalAnchors;
+    static GameObject wall;
 
-    public GameObject wallToRemove;         // kun udfyldt på én af anchors
+    bool isActivated;
 
-    private bool isActivated = false;
-
-    private void Awake()
+    void Awake()
     {
-        // Sæt startfarve
-        if (rend != null && redPoint != null)
-            rend.material = redPoint;
+        activatedCount = 0;
+        if (wallToRemove != null) wall = wallToRemove;
+        if (rend != null && redPoint != null) rend.material = redPoint;
+
+        GetComponent<TeleportationAnchor>().teleporting.AddListener(_ => OnTeleportHere());
     }
 
-    // XR Interaction Toolkit event
-    public void OnTeleportHere(LocomotionSystem locomotion)
+    void Start()
+    {
+        totalAnchors = FindObjectsByType<TeleportAnchorTrigger>(FindObjectsSortMode.None).Length;
+    }
+
+    void OnTeleportHere()
     {
         if (isActivated) return;
-
-        // Skift farve
-        rend.material = greenPoint;
         isActivated = true;
 
+        rend.material = greenPoint;
         activatedCount++;
+        Debug.Log($"Anchors activated: {activatedCount}/{totalAnchors}");
 
-        // Hvis alle anchors er aktiveret → fjern væg
-        if (activatedCount >= totalAnchors && wallToRemove != null)
-        {
-            wallToRemove.SetActive(false);
-        }
+        if (activatedCount >= totalAnchors && wall != null)
+            wall.SetActive(false);
     }
 }

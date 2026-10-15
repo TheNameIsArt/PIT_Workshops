@@ -10,6 +10,7 @@ public class TeleportController : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("TeleportController started, action: " + teleportationActivationAction.action?.name);
         teleportInteractor.gameObject.SetActive(false);
 
         teleportationActivationAction.action.Enable();
@@ -19,6 +20,7 @@ public class TeleportController : MonoBehaviour
 
     private void Action_performed(InputAction.CallbackContext obj)
     {
+        Debug.Log("Teleport action performed");
         teleportInteractor.gameObject.SetActive(true);
     }
 
